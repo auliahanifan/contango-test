@@ -1,29 +1,57 @@
-# Create T3 App
+# CV Verifier
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+This is a full-stack web app that lets a user submit personal details and a PDF CV, then uses an AI validator to confirm that the typed data matches the PDF.
 
-## What's next? How do I make an app with this?
-
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
-
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Tech Stack
 
 - [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
 - [tRPC](https://trpc.io)
+- [Drizzle ORM](https://orm.drizzle.team)
+- [Tailwind CSS](https://tailwindcss.com)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Docker](https://www.docker.com/)
+- [Mastra](https://docs.mastra.io/)
 
-## Learn More
+## Getting Started
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+### Prerequisites
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+- [Docker](https://docs.docker.com/get-docker/)
+- [Node.js](https://nodejs.org/en/)
+- An [OpenAI API Key](https://platform.openai.com/account/api-keys)
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+### Installation
 
-## How do I deploy this?
+1.  **Clone the repository:**
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+    ```bash
+    git clone <repository-url>
+    cd <repository-name>
+    ```
+
+2.  **Set up environment variables:**
+
+    Create a `.env` file in the root of the project and add your OpenAI API key:
+
+    ```
+    OPENAI_API_KEY=your-openai-api-key
+    ```
+
+3.  **Build and run the application:**
+
+    ```bash
+    docker-compose up --build -d
+    ```
+
+4.  **Open the application:**
+
+    The application will be available at [http://localhost:3000](http://localhost:3000).
+
+## How it works
+
+1.  The user fills out a form with their personal details and uploads a CV in PDF format.
+2.  The Next.js application saves the PDF to a local volume and the metadata to a PostgreSQL database.
+3.  A tRPC mutation triggers a Mastra worker to validate the CV.
+4.  The Mastra worker, using an OpenAI-powered agent, compares the data from the form with the content of the PDF.
+5.  The result of the validation is sent back to the Next.js application via a callback.
+6.  The frontend uses a tRPC subscription to display the validation status in real-time.

@@ -1,0 +1,149 @@
+product_name: CV Verifier (T3 Stack)
+version: "1.3"
+owners:
+  product_manager: "@you"
+  tech_lead: "@agent"
+  design: "— (minimal UI)"
+purpose: >
+  A small full‑stack web app that lets a user submit personal details and
+  a PDF CV, then uses an **AI validator powered by Mastra (OpenAI LLM)** to
+  confirm that the typed data matches the PDF. Success → green banner;
+  failure → red banner with mismatched fields.
+
+# --------------------------------------------------
+context:
+  boilerplate: "Project is scaffolded with **create‑t3‑app** (Next.js 14, tRPC, **Drizzle ORM**, Tailwind). We are **NOT** enabling next‑auth or any other auth; the app is completely public."
+
+# --------------------------------------------------
+goals:
+  - ✅ Collect user profile + PDF in a friendly form.
+  - ✅ Store metadata & file in Postgres **and a local volume**.
+  - ✅ Validate fields vs. PDF with a **Mastra micro‑service using OpenAI**.
+  - ✅ One‑click spin‑up via docker‑compose in prod mode.
+
+non_goals:
+  - Rich styling or mobile polish.
+  - **Any authentication at all** (public, anonymous upload).
+  - Manual review workflows.
+
+# --------------------------------------------------
+user_stories:
+  - id: US-01
+    as: "Visitor"
+    i_want: "to type my details and upload a CV"
+    so_that: "I can instantly know if they match"
+  - id: US-02
+    as: "System"
+    i_want: "to highlight which fields are wrong"
+    so_that: "users can quickly correct them"
+
+# --------------------------------------------------
+functional_requirements:
+  FR-01: Next.js 14+ (pages or app router OK) renders a single route "/".
+  FR-02: Form fields → fullName, email, phone, skills (tags), experience (textarea).
+  FR-03: File input accepts **one** PDF ≤ 5 MB; client shows file name.
+  FR-04: On submit:
+         a) File streams to backend and is saved under `/uploads/{submissionId}.pdf` on a Docker volume.
+         b) Metadata + **local file path** stored in Postgres via **Drizzle ORM**.
+  FR-05: tRPC mutation `cv.submit` returns `submissionId`.
+  FR-06: **Mastra worker** receives payload `{ submissionId, pdfPath, structuredData }`.
+  FR-07: Mastra agent (backed by OpenAI) compares parsed PDF text vs. fields; responds with:
+         `{ valid: boolean, mismatches: { field: expected | found } }`.
+  FR-08: tRPC subscription `cv.status` streams status → client toast/banner.
+  FR-09: Success → green “CV verified!”; Failure → red list of mismatched fields.
+
+non_functional_requirements:
+  NFR-01: Response time < 200 ms for form submit (excluding AI job).
+  NFR-02: PDF stored only on **local Docker volume**, not on any external bucket.
+  NFR-03: Codebase passes `npm run lint` & `npm run test`.
+  NFR-04: Containers start with `docker compose up -d` on x86_64 linux.
+
+# --------------------------------------------------
+architecture:
+  stack: create‑t3‑app (Next.js + tRPC + **Drizzle** + Tailwind + Docker)
+  services:
+    web:
+      description: "Next.js + Node (tRPC router) in one container (multi‑stage build)."
+      context: .  # root of create‑t3‑app
+      dockerfile: Dockerfile
+      ports: [3000]
+      volumes:
+        - uploads_data:/app/uploads  # mount for PDF storage
+    db:
+      image: "postgres:16-alpine"
+      env:
+        POSTGRES_USER: cv
+        POSTGRES_PASSWORD: cvpass
+        POSTGRES_DB: cvdb
+      volumes: ["db_data:/var/lib/postgresql/data"]
+    mastra_worker:
+      description: "Mastra container running agent workflow `cv-validate`."
+      build: ./mastra
+      env:
+        OPENAI_API_KEY: "${OPENAI_API_KEY}"
+        TRPC_ENDPOINT: "http://web:3000/api/trpc"
+      volumes:
+        - uploads_data:/mastra/uploads  # read PDFs for validation
+  volumes:
+    db_data: {}
+    uploads_data: {}
+
+data_model:
+  drizzle:
+    # Drizzle schema written in TypeScript (db/schema.ts)
+    tables:
+      users:
+        id: uuid primary key default(gen_random_uuid())
+        full_name: text not null
+        email: text not null
+        phone: text not null
+        skills: jsonb not null  # array of strings
+        experience: text not null
+      submissions:
+        id: uuid primary key default(gen_random_uuid())
+        user_id: uuid references users(id)
+        pdf_path: text not null
+        status: text default 'PENDING' check in ('PENDING','SUCCESS','FAILED')
+        mismatches: jsonb
+        created_at: timestamp default now()
+
+api_contracts:
+  trpc:
+    - name: "cv.submit"
+      input: SubmitInput  # zod schema
+      output: { submissionId: string }
+    - name: "cv.status"
+      input: { submissionId: string }
+      output: StatusPayload  # { status, mismatches? } (subscribable)
+
+ai_validation_protocol:
+  1. Mastra agent reads PDF from `pdfPath`.
+  2. Extract text with `pdf-parse`.
+  3. Compare each field using fuzzy match (>= 0.9 Jaro‑Winkler) or exact.
+  4. POST result back to `web` at `/api/validate-callback`.
+
+# --------------------------------------------------
+acceptance_criteria:
+  - AC-01: Submitting matching data shows success within 10 s (demo PDF).
+  - AC-02: Submitting wrong phone triggers FAILED with phone mismatch listed.
+  - AC-03: `docker compose up --build` then http://localhost:3000 shows form.
+
+milestones:
+  - M1 (½ day): Integrate Drizzle into the create‑t3‑app boilerplate (replace Prisma client if still present).
+  - M2 (1 day): Form UI + tRPC submit & DB schema.
+  - M3 (1 day): File upload & local storage.
+  - M4 (1 day): **Mastra worker** + validation logic (OpenAI integration).
+  - M5 (½ day): Docker‑compose & README.
+  - M6 (½ day): Polish, tests, hand‑off.
+
+open_questions:
+  - Token budgeting limits for OpenAI in Mastra agent?
+  - Is rate‑limiting or CAPTCHA needed to prevent spam uploads later?
+
+deliverables:
+  - `/src` – React components, pages, and tRPC routers (create‑t3‑app structure).
+  - `/src/server/db/schema.ts` – Drizzle table definitions and relations.
+  - `/drizzle` – Auto‑generated SQL migrations/generations by drizzle.
+  - `/mastra` – Dockerfile, agent scripts, and workflow definition.
+  - `docker-compose.yml` at project root.
+  - `README.md` with setup instructions (< 150 lines).

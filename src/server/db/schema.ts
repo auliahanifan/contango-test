@@ -1,29 +1,35 @@
-// Example model schema from the Drizzle docs
-// https://orm.drizzle.team/docs/sql-schema-declaration
-
-import { sql } from "drizzle-orm";
-import { index, pgTableCreator } from "drizzle-orm/pg-core";
+import {
+  pgTableCreator,
+  timestamp,
+  text,
+  uuid,
+  jsonb,
+} from "drizzle-orm/pg-core";
 
 /**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
- *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
+ * This is the schema for the CV Verifier application.
  */
+
 export const createTable = pgTableCreator(
   (name) => `socium-contango-aulia-test_${name}`,
 );
 
-export const posts = createTable(
-  "post",
-  (d) => ({
-    id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-    name: d.varchar({ length: 256 }),
-    createdAt: d
-      .timestamp({ withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
-  }),
-  (t) => [index("name_idx").on(t.name)],
-);
+export const users = createTable("users", () => ({
+  id: uuid("id").primaryKey().defaultRandom(),
+  fullName: text("full_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull(),
+  skills: jsonb("skills").notNull(), // array of strings
+  experience: text("experience").notNull(),
+}));
+
+export const submissions = createTable("submissions", () => ({
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id),
+  pdfPath: text("pdf_path").notNull(),
+  status: text("status")
+    .default("PENDING")
+    .$type<"PENDING" | "SUCCESS" | "FAILED">(),
+  mismatches: jsonb("mismatches"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}));
