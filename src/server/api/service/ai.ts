@@ -4,13 +4,19 @@ import { readFileSync, existsSync } from "fs";
 
 // Wrapper to suppress Buffer deprecation warning from pdf-parse
 async function suppressBufferWarning<T>(fn: () => Promise<T>): Promise<T> {
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   const originalEmitWarning = process.emitWarning;
-  (process as any).emitWarning = (warning: any, ...args: any[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const suppressedEmitWarning = function(this: void, warning: any, ...args: any[]) {
     if (typeof warning === 'string' && warning.includes('Buffer() is deprecated')) {
       return;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     return originalEmitWarning.call(process, warning, ...args);
   };
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+  (process as any).emitWarning = suppressedEmitWarning;
   
   try {
     return await fn();

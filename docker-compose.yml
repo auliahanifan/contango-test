@@ -16,6 +16,7 @@ services:
       - DATABASE_URL=postgres://cv:cvpass@db:5432/cvdb
       - TRPC_ENDPOINT=http://web:3000/api/trpc
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NODE_NO_WARNINGS=1
 
   db:
     image: 'postgres:16-alpine'
@@ -23,6 +24,8 @@ services:
       - POSTGRES_USER=cv
       - POSTGRES_PASSWORD=cvpass
       - POSTGRES_DB=cvdb
+    ports:
+      - '5432:5432'
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
