@@ -2,6 +2,23 @@ import OpenAI from "openai";
 import pdfParse from "pdf-parse";
 import { readFileSync, existsSync } from "fs";
 
+// Wrapper to suppress Buffer deprecation warning from pdf-parse
+async function suppressBufferWarning<T>(fn: () => Promise<T>): Promise<T> {
+  const originalEmitWarning = process.emitWarning;
+  (process as any).emitWarning = (warning: any, ...args: any[]) => {
+    if (typeof warning === 'string' && warning.includes('Buffer() is deprecated')) {
+      return;
+    }
+    return originalEmitWarning.call(process, warning, ...args);
+  };
+  
+  try {
+    return await fn();
+  } finally {
+    process.emitWarning = originalEmitWarning;
+  }
+}
+
 // Lazy initialization of OpenAI client
 let openai: OpenAI | null = null;
 
@@ -29,7 +46,7 @@ export async function getPdfText(pdfPath: string): Promise<string> {
 
     console.log("PDF buffer size:", pdfBuffer.length);
 
-    const data = await pdfParse(pdfBuffer);
+    const data = await suppressBufferWarning(async () => await pdfParse(pdfBuffer));
 
     if (!data.text || data.text.trim().length === 0) {
       throw new Error("PDF appears to be empty or contains no readable text");
