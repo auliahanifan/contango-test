@@ -56,10 +56,14 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy test data for PDF processing
 COPY --from=builder --chown=nextjs:nodejs /app/test ./test
 
+# Copy startup script
+COPY start.sh ./start.sh
+RUN chmod +x start.sh
+
 USER nextjs
 
 EXPOSE 3000
 
 ENV PORT 3000
 
-CMD ["node", "--trace-deprecation", "server.js"]
+CMD ["./start.sh"]
