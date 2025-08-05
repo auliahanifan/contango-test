@@ -1,3 +1,5 @@
+![alt text](image.png "Title")
+
 # CV Verifier
 
 This is a full-stack web app that lets a user submit personal details and a PDF CV, then uses an AI validator to confirm that the typed data matches the PDF.

@@ -1,0 +1,69 @@
+
+
+ Aulia Rahman Hanifan 
+ Yogyakarta, Indonesia  •  +62-857-2631-7318  •  auliarahman80@gmail.com 
+ Education 
+ Politeknik Negeri Jakarta 
+ Diploma III of Mechanical Engineering 
+ GPA: 3.43/4.00 
+ Depok 
+ 2018 
+ Experience 
+ Software Engineer (Full-Stack) 
+ Delegasi (Full-Time) 
+ •  Spearheaded development as a founding engineer, architecting the entire technical 
+ infrastructure from ground up. 
+ •  Drove product engagement metrics, achieving over 50% Weekly Active 
+ Users/Monthly Active Uses (WAU/MAU) ratio. 
+ •  Independently designed, built, and scaled B2B Payment platform from conception to 
+ processing over $3M USD in transactions within 12 months. 
+ •  Implemented CI/CD pipelines and established engineering best practices, enabling 
+ rapid iteration and product deployments. 
+ Remote
+ Jan 2023 - May 2025
+ Software Engineer (Full-Stack/Odoo) 
+ Segarloka (Freelance) 
+ •  Independently developed and maintained odoo module. 
+ •  Built AI workflow for customer service operations from scratch, decreasing input time 
+ from minutes to seconds. 
+ •  Built an entire digital system from 0 revenue to billions of rupiah monthly revenue. 
+ Remote
+ 2021 - 2025 
+ Technical Co-Founder 
+ Fix AI (Part-Time) 
+ •  Designed and developed Chrome Extension using Plasmo, React, and TypeScript that 
+ integrates AI agents for customer support, improving user experience and issue 
+ resolution time by more than 40%. 
+ •  Built end-to-end AI Agents using TypeScript for comprehensive customer support 
+ solutions. 
+ •  Conducting in-depth research for AI-based product development and market 
+ opportunity identification. 
+ Remote
+ Jun 2024 - Jan 2025 
+ Software Engineer II (Backend) 
+ BukuWarung (Full-Time) 
+ •  Developed an e-wallet system with high code quality. 
+ •  Created automation tools for the operations team that reduced issue resolution time. 
+ from dozens of manual interventions per day to less than 10 minutes daily. 
+ Remote
+ Jan 2022 - Nov 2022 
+ Software Engineer (Backend) 
+ Traveloka (Full-Time) 
+ •  Developed TravelokaPay e-wallet with >50% unit test coverage to ensure system 
+ stability. 
+ •  Developed a new product (environmental management fee) from scratch in e-Bill 
+ system. 
+ Remote
+ May 2021 - Jan 2022 
+
+ Software Engineer (Backend & Desktop) 
+ Alterra (Full-Time) 
+ •  Revamped modern desktop ERP application from scratch using .NET technology, 
+ improving performance and user experience. 
+ •  Built an automation system that helped the infrastructure team reduce production 
+ deployment time from 1 day to just 5 minutes. 
+ Malang & Remote 
+ Sep 2019 - May 2021 
+ Additional 
+ Language Skills:  Bahasa  Indonesia and English. 
+ Technical Skills:  TypeScript/JavaScript, Python, React,  Java, Odoo 
