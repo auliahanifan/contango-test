@@ -44,8 +44,9 @@ export async function getPdfText(pdfPath: string): Promise<string> {
     console.error("PDF parsing failed for path:", pdfPath, "Error:", error);
 
     if (error instanceof Error) {
+      const nodeError = error as Error & { code?: string };
       if (
-        (error as any).code === "ENOENT" ||
+        nodeError.code === "ENOENT" ||
         error.message.includes("not found")
       ) {
         throw new Error(
@@ -153,7 +154,7 @@ export async function validateCv(
         const cvLines = cvText.split("\n").slice(0, 5); // Check first 5 lines
         const namePattern = /^[A-Z][a-z]+ [A-Z][a-z]+/;
         const cvName =
-          cvLines.find((line) => namePattern.test(line.trim()))?.trim() ||
+          cvLines.find((line) => namePattern.test(line.trim()))?.trim() ??
           "not clearly identifiable";
         mockMismatches.fullName = `Name mismatch - Form: "${data.fullName}" vs CV: "${cvName}"`;
       }
@@ -165,8 +166,8 @@ export async function validateCv(
     ) {
       // Extract email from CV
       const emailPattern = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-      const cvEmails = cvText.match(emailPattern) || [];
-      const cvEmail = cvEmails[0] || "not found";
+      const cvEmails = cvText.match(emailPattern) ?? [];
+      const cvEmail = cvEmails[0] ?? "not found";
       mockMismatches.email = `Email mismatch - Form: "${data.email}" vs CV: "${cvEmail}"`;
     }
 
@@ -176,8 +177,8 @@ export async function validateCv(
       if (!cvDigits.includes(phoneDigits.slice(-7))) {
         // Extract phone from CV
         const phonePattern = /[+]?[0-9][0-9\s\-\(\)]{8,}/g;
-        const cvPhones = cvText.match(phonePattern) || [];
-        const cvPhone = cvPhones[0]?.trim() || "not found";
+        const cvPhones = cvText.match(phonePattern) ?? [];
+        const cvPhone = cvPhones[0]?.trim() ?? "not found";
         mockMismatches.phone = `Phone mismatch - Form: "${data.phone}" vs CV: "${cvPhone}"`;
       }
     }
@@ -188,9 +189,9 @@ export async function validateCv(
       );
       if (missingSkills.length > 0) {
         // Extract skills section from CV
-        const skillsSection =
-          cvText.match(/skills?[:\s]*([^\n]*(?:\n[^\n]*){0,5})/i)?.[1] ||
-          "skills section not clearly identified";
+        const skillsRegex = /skills?[:\s]*([^\n]*(?:\n[^\n]*){0,5})/i;
+        const skillsMatch = skillsRegex.exec(cvText);
+        const skillsSection = skillsMatch?.[1] ?? "skills section not clearly identified";
         mockMismatches.skills = `Skills mismatch - Missing from CV: [${missingSkills.join(", ")}]. CV skills section: "${skillsSection.trim()}"`;
       }
     }
@@ -205,9 +206,9 @@ export async function validateCv(
       );
       if (matchingWords.length < experienceWords.length * 0.3) {
         // Extract experience section from CV
-        const expSection =
-          cvText.match(/experience[:\s]*([^\n]*(?:\n[^\n]*){0,10})/i)?.[1] ||
-          "experience section not clearly identified";
+        const expRegex = /experience[:\s]*([^\n]*(?:\n[^\n]*){0,10})/i;
+        const expMatch = expRegex.exec(cvText);
+        const expSection = expMatch?.[1] ?? "experience section not clearly identified";
         mockMismatches.experience = `Experience mismatch - Form: "${data.experience}" vs CV experience: "${expSection.trim().substring(0, 200)}..."`;
       }
     }
