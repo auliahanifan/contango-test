@@ -26,7 +26,7 @@ export const users = createTable("users", () => ({
 export const submissions = createTable("submissions", () => ({
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").references(() => users.id),
-  pdfPath: text("pdf_path").notNull(),
+  pdfPath: text("pdf_path"),
   status: text("status")
     .default("PENDING")
     .$type<"PENDING" | "SUCCESS" | "FAILED">(),

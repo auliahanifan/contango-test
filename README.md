@@ -10,7 +10,7 @@ This is a full-stack web app that lets a user submit personal details and a PDF 
 - [Tailwind CSS](https://tailwindcss.com)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Docker](https://www.docker.com/)
-- [Mastra](https://docs.mastra.io/)
+- [OpenAI](https://openai.com/)
 
 ## Getting Started
 
@@ -51,7 +51,7 @@ This is a full-stack web app that lets a user submit personal details and a PDF 
 
 1.  The user fills out a form with their personal details and uploads a CV in PDF format.
 2.  The Next.js application saves the PDF to a local volume and the metadata to a PostgreSQL database.
-3.  A tRPC mutation triggers a Mastra worker to validate the CV.
-4.  The Mastra worker, using an OpenAI-powered agent, compares the data from the form with the content of the PDF.
-5.  The result of the validation is sent back to the Next.js application via a callback.
+3.  The tRPC mutation immediately processes the CV validation inline using OpenAI.
+4.  The OpenAI integration compares the data from the form with the content of the PDF.
+5.  The validation result is immediately stored in the database and emitted via events.
 6.  The frontend uses a tRPC subscription to display the validation status in real-time.

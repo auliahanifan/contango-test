@@ -46,8 +46,8 @@ functional_requirements:
          a) File streams to backend and is saved under `/uploads/{submissionId}.pdf` on a Docker volume.
          b) Metadata + **local file path** stored in Postgres via **Drizzle ORM**.
   FR-05: tRPC mutation `cv.submit` returns `submissionId`.
-  FR-06: **Mastra worker** receives payload `{ submissionId, pdfPath, structuredData }`.
-  FR-07: Mastra agent (backed by OpenAI) compares parsed PDF text vs. fields; responds with:
+  FR-06: **Mastra AI service** (separate folder/module) receives payload `{ submissionId, pdfPath, structuredData }`.
+  FR-07: Mastra AI service (backed by OpenAI) compares parsed PDF text vs. fields; responds with:
          `{ valid: boolean, mismatches: { field: expected | found } }`.
   FR-08: tRPC subscription `cv.status` streams status → client toast/banner.
   FR-09: Success → green “CV verified!”; Failure → red list of mismatched fields.
@@ -77,7 +77,7 @@ architecture:
         POSTGRES_DB: cvdb
       volumes: ["db_data:/var/lib/postgresql/data"]
     mastra_worker:
-      description: "Mastra container running agent workflow `cv-validate`."
+      description: "Mastra AI service container (separate folder structure within project)."
       build: ./mastra
       env:
         OPENAI_API_KEY: "${OPENAI_API_KEY}"
@@ -117,9 +117,9 @@ api_contracts:
       output: StatusPayload  # { status, mismatches? } (subscribable)
 
 ai_validation_protocol:
-  1. Mastra agent reads PDF from `pdfPath`.
+  1. Mastra AI service (organized in `/mastra` folder) reads PDF from `pdfPath`.
   2. Extract text with `pdf-parse`.
-  3. Compare each field using fuzzy match (>= 0.9 Jaro‑Winkler) or exact.
+  3. Compare each field using fuzzy match (>= 0.9 Jaro‑Winkler) or exact.
   4. POST result back to `web` at `/api/validate-callback`.
 
 # --------------------------------------------------
@@ -132,7 +132,7 @@ milestones:
   - M1 (½ day): Integrate Drizzle into the create‑t3‑app boilerplate (replace Prisma client if still present).
   - M2 (1 day): Form UI + tRPC submit & DB schema.
   - M3 (1 day): File upload & local storage.
-  - M4 (1 day): **Mastra worker** + validation logic (OpenAI integration).
+  - M4 (1 day): **Mastra AI service** (separate folder) + validation logic (OpenAI integration).
   - M5 (½ day): Docker‑compose & README.
   - M6 (½ day): Polish, tests, hand‑off.
 
@@ -144,6 +144,6 @@ deliverables:
   - `/src` – React components, pages, and tRPC routers (create‑t3‑app structure).
   - `/src/server/db/schema.ts` – Drizzle table definitions and relations.
   - `/drizzle` – Auto‑generated SQL migrations/generations by drizzle.
-  - `/mastra` – Dockerfile, agent scripts, and workflow definition.
+  - `/mastra` – Separate folder containing AI service: Dockerfile, validation scripts, and OpenAI integration.
   - `docker-compose.yml` at project root.
   - `README.md` with setup instructions (< 150 lines).

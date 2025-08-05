@@ -1,0 +1,1 @@
+Before build, ensure npm run lint and fix it!!!!

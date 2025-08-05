@@ -24,6 +24,9 @@ COPY . .
 # Uncomment the following line in case you want to disable telemetry during the build.
 # ENV NEXT_TELEMETRY_DISABLED 1
 
+# Skip environment validation during build
+ENV SKIP_ENV_VALIDATION 1
+
 RUN npm run build
 
 # Production image, copy all the files and run next
